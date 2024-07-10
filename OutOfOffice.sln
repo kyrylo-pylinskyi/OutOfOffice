@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "AuthService\AuthService.csproj", "{5CF1F624-DE13-4126-BE94-B12FB2DE2A4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainService", "MainService\MainService.csproj", "{8E436449-C4A1-4CDD-A5CB-DE1F08258328}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CF1F624-DE13-4126-BE94-B12FB2DE2A4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CF1F624-DE13-4126-BE94-B12FB2DE2A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CF1F624-DE13-4126-BE94-B12FB2DE2A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CF1F624-DE13-4126-BE94-B12FB2DE2A4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E436449-C4A1-4CDD-A5CB-DE1F08258328}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E436449-C4A1-4CDD-A5CB-DE1F08258328}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E436449-C4A1-4CDD-A5CB-DE1F08258328}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E436449-C4A1-4CDD-A5CB-DE1F08258328}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
