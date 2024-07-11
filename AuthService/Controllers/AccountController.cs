@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using AuthService.Models;
-using AuthService.Services.SMTP;
+using AuthService.Services.Smtp;
 using AuthService.Services.Options;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,10 +19,10 @@ public class AccountController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IMapper _mapper;
-    private readonly IEmailSender _emailSender;
+    private readonly EmailSender _emailSender;
     private readonly JwtSettings _jwtSettings;
 
-    public AccountController(UserManager<ApplicationUser> userManager, IMapper mapper, IEmailSender emailSender, IOptions<JwtSettings> jwtSettings)
+    public AccountController(UserManager<ApplicationUser> userManager, IMapper mapper, EmailSender emailSender, IOptions<JwtSettings> jwtSettings)
     {
         _userManager = userManager;
         _mapper = mapper;

@@ -1,37 +1,31 @@
-using System.Net;
 using System.Net.Mail;
 using AuthService.Services.Options;
 using Microsoft.Extensions.Options;
 
-namespace AuthService.Services.SMTP;
+namespace AuthService.Services.Smtp;
 
-public class EmailSender : IEmailSender
+public class EmailSender
 {
-    private readonly EmailSettings _emailSettings;
+    private readonly ISmtpClient _smtpClient;
+    private readonly SmtpSettings _smtpSettings;
 
-    public EmailSender(IOptions<EmailSettings> emailSettings)
+    public EmailSender(IOptions<SmtpSettings> smtpSettings, ISmtpClient smtpClient)
     {
-        _emailSettings = emailSettings.Value;
+        _smtpSettings = smtpSettings.Value;
+        _smtpClient = smtpClient;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message)
+    public async Task SendEmailAsync(string recipient, string subject, string messageBody)
     {
-        var client = new SmtpClient(_emailSettings.SmtpServer)
+        var message = new MailMessage
         {
-            Port = _emailSettings.Port,
-            Credentials = new NetworkCredential(_emailSettings.Username, _emailSettings.Password),
-            EnableSsl = _emailSettings.EnableSsl,
-        };
-
-        var mailMessage = new MailMessage
-        {
-            From = new MailAddress(_emailSettings.SenderEmail, _emailSettings.SenderName),
+            From = new MailAddress(_smtpSettings.SenderEmail, _smtpSettings.SenderName),
             Subject = subject,
-            Body = message,
-            IsBodyHtml = true,
+            Body = messageBody,
+            IsBodyHtml = false,
         };
-        mailMessage.To.Add(email);
+        message.To.Add(new MailAddress(recipient));
 
-        await client.SendMailAsync(mailMessage);
+        await _smtpClient.SendEmailAsync(message);
     }
 }
