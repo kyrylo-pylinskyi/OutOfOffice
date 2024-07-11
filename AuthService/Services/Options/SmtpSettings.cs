@@ -1,6 +1,6 @@
 namespace AuthService.Services.Options;
 
-public class EmailSettings
+public class SmtpSettings
 {
     public string SmtpServer { get; set; }
     public int Port { get; set; }

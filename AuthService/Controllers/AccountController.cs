@@ -1,77 +1,39 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
-using AuthService.Models;
-using AuthService.Services.SMTP;
-using AuthService.Services.Options;
-using Microsoft.Extensions.Options;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using System.Security.Claims;
-using System;
-using AuthService.DTO;
-using AutoMapper;
+using AuthService.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AuthService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
 public class AccountController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IMapper _mapper;
-    private readonly IEmailSender _emailSender;
-    private readonly JwtSettings _jwtSettings;
 
-    public AccountController(UserManager<ApplicationUser> userManager, IMapper mapper, IEmailSender emailSender, IOptions<JwtSettings> jwtSettings)
+    public AccountController(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
-        _mapper = mapper;
-        _emailSender = emailSender;
-        _jwtSettings = jwtSettings.Value;
     }
     
-    [HttpPost(nameof(Register))]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    [HttpGet(nameof(GetUserInfo))]
+    public async Task<IActionResult> GetUserInfo()
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        var identity = HttpContext.User.Identity as ClaimsIdentity;
+        string email = identity.FindFirst(ClaimTypes.Email)?.Value;
 
-        var user = _mapper.Map<ApplicationUser>(model);
-        user.UserName = model.Email;
-
-        var result = await _userManager.CreateAsync(user, model.Password);
-
-        if (result.Succeeded)
-        {
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account", new { token, email = user.Email }, Request.Scheme);
-            await _emailSender.SendEmailAsync(user.Email, "Confirm your email", confirmationLink);
-            return Ok("Registration successful. Please confirm your email.");
-        }
-
-        foreach (var error in result.Errors)
-            ModelState.AddModelError("", error.Description);
-
-        return BadRequest(ModelState);
-    }
-    
-    [HttpGet(nameof(ConfirmEmail))]
-    public async Task<IActionResult> ConfirmEmail(string token, string email)
-    {
+        if(email == null) return BadRequest("User email context is null");
         var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-            return BadRequest("Invalid Email Confirmation Request");
+        
+        return Ok(user);
+    }
+    
+    private static string GetEmail(HttpContext context)
+    {
+        var identity = context.User.Identity as ClaimsIdentity;
+        if (identity != null)
+            return identity.FindFirst(ClaimTypes.Email)?.Value;
 
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-
-        if (result.Succeeded)
-        {
-            user.IsActive = true;
-            await _userManager.UpdateAsync(user);
-
-            return Ok("Email confirmed successfully! User is now active.");
-        }
-
-        return BadRequest("Email confirmation failed");
+        return null;
     }
 }

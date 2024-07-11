@@ -9,6 +9,10 @@ public class RegisterProfile : Profile
     public RegisterProfile()
     {
         CreateMap<RegisterModel, ApplicationUser>()
+            .ForMember(dest => dest.UserName, 
+                opt => opt.MapFrom(src => $"{src.Name.ToLower()}.{src.Surname.ToLower()}"))
+            .ForMember(dest => dest.Email,
+                opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.FullName, 
                 opt => opt.MapFrom(src => $"{src.Name} {src.Surname}"))
             .ForMember(dest => dest.IsActive, 

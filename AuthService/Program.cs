@@ -2,8 +2,10 @@ using System.Text;
 using AuthService.Data;
 using AuthService.Models;
 using AuthService.Profiles;
+using AuthService.Services.Jwt;
 using AuthService.Services.Options;
-using AuthService.Services.SMTP;
+using AuthService.Services.Senders;
+using AuthService.Services.Smtp;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +40,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         options.OperationFilter<SecurityRequirementsOperationFilter>();
     });
 
-    services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+    services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
     services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
     services.AddDbContext<ApplicationDbContext>(options =>
@@ -49,8 +51,10 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         .AddDefaultTokenProviders();
 
     services.AddAuthorization();
-
+    
+    services.AddTransient<ISmtpClient, SmtpClient>();
     services.AddTransient<IEmailSender, EmailSender>();
+    services.AddTransient<IJwtService, JwtService>();
 
     services.AddAuthentication(options =>
     {
