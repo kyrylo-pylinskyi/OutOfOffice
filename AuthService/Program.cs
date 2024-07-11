@@ -1,6 +1,7 @@
 using System.Text;
 using AuthService.Data;
 using AuthService.Models;
+using AuthService.Profiles;
 using AuthService.Services.Options;
 using AuthService.Services.SMTP;
 using Microsoft.AspNetCore.Identity;
@@ -24,6 +25,7 @@ app.Run();
 
 void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    services.AddAutoMapper(typeof(RegisterProfile));
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen(options =>
     {
