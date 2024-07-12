@@ -1,6 +1,7 @@
-using System.Security.Claims;
-using AuthService.Models;
-using Microsoft.AspNetCore.Identity;
+using AuthService.Dto;
+using AuthService.Dto.Requests;
+using AuthService.Services.Jwt;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthService.Controllers;
@@ -9,31 +10,40 @@ namespace AuthService.Controllers;
 [ApiController]
 public class AccountController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IJwtService _jwtService;
+    private readonly IMapper _mapper;
 
-    public AccountController(UserManager<ApplicationUser> userManager)
+    public AccountController(IJwtService jwtService, IMapper mapper)
     {
-        _userManager = userManager;
+        _jwtService = jwtService;
+        _mapper = mapper;
     }
     
-    [HttpGet(nameof(GetUserInfo))]
-    public async Task<IActionResult> GetUserInfo()
+    [HttpPost(nameof(GetUserFromToken))]
+    public async Task<IActionResult> GetUserFromToken([FromBody] TokenRequest tokenRequest)
     {
-        var identity = HttpContext.User.Identity as ClaimsIdentity;
-        string email = identity.FindFirst(ClaimTypes.Email)?.Value;
+        var result = await _jwtService.GetUserFromTokenAsync(tokenRequest.Token);
 
-        if(email == null) return BadRequest("User email context is null");
-        var user = await _userManager.FindByEmailAsync(email);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+
+        var userInfoResponse = _mapper.Map<UserInfoResonse>(result.Value);
         
-        return Ok(user);
+        return Ok(userInfoResponse);
     }
-    
-    private static string GetEmail(HttpContext context)
-    {
-        var identity = context.User.Identity as ClaimsIdentity;
-        if (identity != null)
-            return identity.FindFirst(ClaimTypes.Email)?.Value;
 
-        return null;
+    [HttpPost(nameof(RefreshToken))]
+    public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+    {
+        var result = await _jwtService.RefreshTokenAsync(tokenRequest);
+
+        if (!result.IsSuccess)
+        {
+            return BadRequest(result.Error);
+        }
+
+        return Ok(result.Value);
     }
 }

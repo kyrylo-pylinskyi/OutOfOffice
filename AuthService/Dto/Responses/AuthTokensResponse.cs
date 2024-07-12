@@ -1,6 +1,6 @@
-namespace AuthService.DTO;
+namespace AuthService.Dto;
 
-public class SignInResponseModel
+public class AuthTokensResponse
 {
     public string AccessToken { get; set; }
     public string RefreshToken { get; set; }

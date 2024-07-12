@@ -1,10 +1,12 @@
-using AuthService.DTO;
+using AuthService.Dto;
+using AuthService.Dto.Requests;
 using AuthService.Models;
-using AuthService.Services.Options;
 
 namespace AuthService.Services.Jwt;
 
 public interface IJwtService
 {
-    Task<SignInResponseModel> GetUserAuthTokensAsync(ApplicationUser user);
+    Task<Result<AuthTokensResponse>> GetUserAuthTokensAsync(ApplicationUser user);
+    Task<Result<ApplicationUser>> GetUserFromTokenAsync(string token);
+    Task<Result<AuthTokensResponse>> RefreshTokenAsync(TokenRequest request);
 }

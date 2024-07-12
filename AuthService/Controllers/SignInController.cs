@@ -1,4 +1,4 @@
-using AuthService.DTO;
+using AuthService.Dto.Requests;
 using AuthService.Models;
 using AuthService.Services.Jwt;
 using AuthService.Services.Senders;
@@ -51,15 +51,21 @@ namespace AuthService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var tokens = await _jwtService.GetUserAuthTokensAsync(user);
+            var tokensResult = await _jwtService.GetUserAuthTokensAsync(user);
 
-            return Ok(tokens);
+            if (!tokensResult.IsSuccess)
+            {
+                ModelState.AddModelError("", tokensResult.Error);
+                return BadRequest(ModelState);
+            }
+
+            return Ok(tokensResult.Value);
         }
 
         [HttpPost(nameof(ForgotPassword))]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
                 return BadRequest("User not found");
 
@@ -71,13 +77,13 @@ namespace AuthService.Controllers
         }
 
         [HttpPost(nameof(ResetPassword))]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
                 return BadRequest("User not found");
 
-            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
 
             if (result.Succeeded)
                 return Ok("Password has been reset.");

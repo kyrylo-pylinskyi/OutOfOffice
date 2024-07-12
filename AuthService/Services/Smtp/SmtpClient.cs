@@ -9,9 +9,9 @@ public class SmtpClient : ISmtpClient
 {
     private readonly SmtpSettings _smtpSettings;
 
-    public SmtpClient(IOptions<SmtpSettings> emailSettings)
+    public SmtpClient(IOptions<SmtpSettings> smtpSettings)
     {
-        _smtpSettings = emailSettings.Value;
+        _smtpSettings = smtpSettings.Value;
     }
 
     public async Task SendEmailAsync(MailMessage mailMessage)
@@ -25,4 +25,6 @@ public class SmtpClient : ISmtpClient
 
         await client.SendMailAsync(mailMessage);
     }
+
+    public MailAddress GetMailAddress() => new(_smtpSettings.SenderEmail, _smtpSettings.SenderName);
 }

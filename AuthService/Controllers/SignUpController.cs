@@ -1,4 +1,4 @@
-using AuthService.DTO;
+using AuthService.Dto.Requests;
 using AuthService.Models;
 using AuthService.Services.Senders;
 using AutoMapper;
@@ -29,18 +29,24 @@ public class SignUpController : ControllerBase
     }
     
     [HttpPost(nameof(Register))]
-    public async Task<IActionResult> Register([FromForm] RegisterModel model)
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var user = _mapper.Map<ApplicationUser>(model);
+        if (await _userManager.FindByEmailAsync(request.Email) != null)
+        {
+            ModelState.AddModelError("", $"Email address {request.Email} is reserved");
+            return BadRequest(ModelState);
+        }
 
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var user = _mapper.Map<ApplicationUser>(request);
+
+        var result = await _userManager.CreateAsync(user, request.Password);
 
         if (result.Succeeded)
         {
-            var roleName = model.Role.ToString();
+            var roleName = request.Role.ToString();
             
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
@@ -82,12 +88,12 @@ public class SignUpController : ControllerBase
     }
     
     [HttpPost(nameof(ResendEmailConfirmation))]
-    public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationEmailModel model)
+    public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendConfirmationEmailRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var user = await _userManager.FindByEmailAsync(model.Email);
+        var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null)
             return BadRequest("User not found.");
 

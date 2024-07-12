@@ -12,15 +12,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 ConfigureServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
 Configure(app);
 
 app.Run();
@@ -31,7 +30,7 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen(options =>
     {
-        options.AddSecurityDefinition("oath2", new OpenApiSecurityScheme
+        options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
         {
             In = ParameterLocation.Header,
             Name = "Authorization",
@@ -39,9 +38,14 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         });
         options.OperationFilter<SecurityRequirementsOperationFilter>();
     });
-
+    
     services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
-    services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+    services.AddTransient<ISmtpClient, SmtpClient>();
+    services.AddTransient<IEmailSender, EmailSender>();
+    
+    services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+    services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
+    services.AddTransient<IJwtService, JwtService>();
 
     services.AddDbContext<ApplicationDbContext>(options =>
         options.UseSqlServer(
@@ -51,10 +55,6 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
         .AddDefaultTokenProviders();
 
     services.AddAuthorization();
-    
-    services.AddTransient<ISmtpClient, SmtpClient>();
-    services.AddTransient<IEmailSender, EmailSender>();
-    services.AddTransient<IJwtService, JwtService>();
 
     services.AddAuthentication(options =>
     {
@@ -69,9 +69,9 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["Jwt:Issuer"],
-            ValidAudience = configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+            ValidIssuer = configuration["JwtSettings:Issuer"],
+            ValidAudience = configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]))
         };
     });
 
@@ -84,7 +84,7 @@ void Configure(WebApplication app)
     {
         var services = scope.ServiceProvider;
         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.EnsureCreated();
+        dbContext.Database.Migrate();
     }
 
     if (app.Environment.IsDevelopment())
