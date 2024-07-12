@@ -1,10 +1,14 @@
 using System.Net.Mail;
 using AuthService.Services.Options;
+using AuthService.Services.Senders;
 using AuthService.Services.Smtp;
 using Microsoft.Extensions.Options;
 using Moq;
+using EmailSender = AuthService.Services.Senders.EmailSender;
 
-public class EmailSenderTest
+namespace AuthServiceTests.Services;
+
+public class EmailSenderTests
 {
     [Fact]
     public async Task EmailSender_SendEmailAsync_ShouldSendEmail()
@@ -27,7 +31,7 @@ public class EmailSenderTest
         var smtpClientMock = new Mock<ISmtpClient>();
         smtpClientMock.Setup(c => c.SendEmailAsync(It.IsAny<MailMessage>())).Returns(Task.CompletedTask);
 
-        var emailSender = new EmailSender(mockOptions.Object, smtpClientMock.Object);
+        var emailSender = new EmailSender(smtpClientMock.Object);
 
         // Act
         await emailSender.SendEmailAsync("recipient@example.com", "Test Subject", "Test Message");

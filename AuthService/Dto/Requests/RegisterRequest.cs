@@ -1,9 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using AuthService.Models;
 
-namespace AuthService.DTO;
+namespace AuthService.Dto.Requests;
 
-public class RegisterModel
+public class RegisterRequest
 {
+    [Required(ErrorMessage = "Role is required")]
+    public UserRole Role { get; set; }
+    
     [Required(ErrorMessage = "Name is required")]
     public string Name { get; set; }
     

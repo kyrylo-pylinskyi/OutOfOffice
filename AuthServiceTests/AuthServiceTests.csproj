@@ -25,11 +25,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
+      <ProjectReference Include="..\AuthService\AuthService.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AuthService\AuthService.csproj" />
+      <Folder Include="Controllers\" />
     </ItemGroup>
 
 </Project>

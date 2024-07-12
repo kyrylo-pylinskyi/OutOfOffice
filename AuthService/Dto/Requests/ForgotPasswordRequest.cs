@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthService.DTO;
+namespace AuthService.Dto.Requests;
 
-public class ResendConfirmationEmailModel
+public class ForgotPasswordRequest
 {
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]

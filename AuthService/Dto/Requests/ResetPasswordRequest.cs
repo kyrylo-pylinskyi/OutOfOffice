@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AuthService.DTO;
+namespace AuthService.Dto.Requests;
 
-public class ResetPasswordModel
+public class ResetPasswordRequest
 {
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]
