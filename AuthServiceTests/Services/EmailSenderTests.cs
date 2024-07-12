@@ -30,8 +30,7 @@ public class EmailSenderTests
 
         var smtpClientMock = new Mock<ISmtpClient>();
         smtpClientMock.Setup(c => c.SendEmailAsync(It.IsAny<MailMessage>())).Returns(Task.CompletedTask);
-
-        var emailSender = new EmailSender(smtpClientMock.Object);
+        var emailSender = new EmailSender(smtpClientMock.Object, mockOptions.Object);
 
         // Act
         await emailSender.SendEmailAsync("recipient@example.com", "Test Subject", "Test Message");

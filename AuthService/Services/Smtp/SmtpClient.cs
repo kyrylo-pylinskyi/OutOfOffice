@@ -25,5 +25,4 @@ public class SmtpClient : ISmtpClient
 
         await client.SendMailAsync(mailMessage);
     }
-    public MailAddress GetMailAddress() => new(_smtpSettings.SenderEmail, _smtpSettings.SenderName);
 }

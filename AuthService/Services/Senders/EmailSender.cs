@@ -8,16 +8,18 @@ namespace AuthService.Services.Senders;
 public class EmailSender : IEmailSender
 {
     private readonly ISmtpClient _smtpClient;
-    public EmailSender(ISmtpClient smtpClient)
+    private readonly SmtpSettings _smtpSettings;
+    public EmailSender(ISmtpClient smtpClient, IOptions<SmtpSettings> smtpSettings)
     {
         _smtpClient = smtpClient;
+        _smtpSettings = smtpSettings.Value;
     }
 
     public async Task SendEmailAsync(string recipient, string subject, string messageBody, bool isBodyHtml = false)
     {
         var message = new MailMessage
         {
-            From = _smtpClient.GetMailAddress(),
+            From = new MailAddress(_smtpSettings.SenderEmail, _smtpSettings.SenderName),
             Subject = subject,
             Body = messageBody,
             IsBodyHtml = false,
