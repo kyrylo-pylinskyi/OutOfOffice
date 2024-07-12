@@ -26,12 +26,12 @@ namespace AuthService.Controllers
         }
 
         [HttpPost(nameof(Login))]
-        public async Task<IActionResult> Login([FromForm] LoginModel model)
+        public async Task<IActionResult> Login([FromForm] LoginRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
                 ModelState.AddModelError("", "Invalid login attempt. User not found.");
@@ -44,7 +44,7 @@ namespace AuthService.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _userManager.CheckPasswordAsync(user, model.Password);
+            var result = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!result)
             {
                 ModelState.AddModelError("", "Invalid login attempt. Incorrect password.");
