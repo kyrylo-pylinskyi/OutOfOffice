@@ -13,7 +13,6 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
-using EmailSender = AuthService.Services.Senders.EmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,16 +1,52 @@
+using MainService.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Configure services
+ConfigureServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Apply migrations and seed database
+Configure(app);
+
+// Run the application
+app.Run();
+
+void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Configure the DbContext with the connection string
+    services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+    // Add controllers to the service collection
+    services.AddControllers();
+
+    // Optionally add Swagger for API documentation
+    services.AddSwaggerGen();
 }
 
-app.UseHttpsRedirection();
+void Configure(WebApplication app)
+{
+    // Apply migrations at runtime
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
+    }
 
-app.Run();
+    // Configure middleware
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthentication(); // Uncomment if using authentication
+    app.UseAuthorization();
+    
+    app.MapControllers(); // Ensure this line is included to map controller routes
+}
